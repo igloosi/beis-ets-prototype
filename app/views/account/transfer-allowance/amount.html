@@ -172,7 +172,7 @@ input, select { display: block; }
       } else if ( !number ) {
         number = 0
       }
-      $this.parent().find('#newnumber').text( amountYouWillHave );
+      $this.parent().find('#newnumber').text( amountYouWillHave.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') );
     });
 
   });
