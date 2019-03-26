@@ -371,12 +371,12 @@ router.post('/account/:id/edit/update-details', function (req, res) {
   res.redirect('confirmation')
 })
 
-router.post('/account/:id/suspend/check-and-submit', function (req, res) {
-  req.session.data.installations.find(function (installation,index) {
+router.post('/account/:id/block/check-and-submit', function (req, res) {
+  req.session.data.installations.find(function (installation, index) {
     if (installation.permitId === req.params.id) {
-        req.session.data.installations[index].status = 'suspended';
-    }}
-  )
+      req.session.data.installations[index].status = 'blocked'
+    }
+  })
   res.redirect('confirmation')
 })
 
@@ -395,6 +395,19 @@ router.post('/account/:id/close/check-and-submit', function (req, res) {
         req.session.data.installations[index].status = 'closed';
     }}
   )
+  var taskID = generateID(116032, 126062)
+  var newTask = {
+    'taskID': taskID,
+    'started': new Date(Date.now()).toISOString(),
+    'lastUpdated': new Date(Date.now()).toISOString(),
+    'type': 'Block account',
+    'notes': req.session.data.account.block.moreDetail,
+    'proposerId': req.session.data.existingAuthorisedRepresentatives[6].id,
+    'proposer': req.session.data.existingAuthorisedRepresentatives[6].name,
+    'status': 'Awaiting approval'
+  }
+  // push newly generated transaction onto transactions table
+  req.session.data.tasks.push(newTask)
   res.redirect('confirmation')
 })
 
