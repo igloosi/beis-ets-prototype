@@ -139,6 +139,7 @@
       {% set accountFromName = '' %}
       {% set accountToName = '' %}
       <ul class='govuk-list'>
+      {% if data.task != ' ' %}
         {% for task in data.tasks | filterObjects('taskStatus', 'is', 'Awaiting approval') | sort(true, false, 'started') %}
           <li>
           <div class="tile-container" data-type='{{task.accountType}}'>
@@ -199,6 +200,8 @@
             </div>
           </li>
         {% endfor %}
+      {% endif %}
+        
         {% for task in data.transactions | sort(true, false, 'started')  %}
           {% if 'awaiting approval' in task.status | lower %}
             {% for inst in data.installations %}
