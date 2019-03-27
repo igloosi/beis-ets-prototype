@@ -91,11 +91,13 @@
   {% endif %}
   </p>
   <p>
+  {% if not 'closure' in installation.status | lower %}
   {{ govukButton({
-    text: "Close account",
+    text: "Propose account closure",
      href: '/account/'+ installation.permitId +'/close/check-and-submit',
      classes: 'hmcts-button--secondary govuk-!-margin-bottom-0'
   }) }}
+  {% endif %}
   </p>
 {% endif %}
 {% endblock %}

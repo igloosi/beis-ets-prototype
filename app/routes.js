@@ -10,6 +10,9 @@ router.use(function (req, res, next) {
   if (!req.session.data.newTrustedAccounts) {
     req.session.data.newTrustedAccounts = []
   }
+  if (!req.session.data.tasks) {
+    req.session.data.tasks = []
+  }
   req.session.data.todaysDate = new Date(Date.now()).toISOString()
   next()
 })
@@ -253,6 +256,31 @@ router.post('/app/user/:id/reinstate/check-and-submit', function (req, res) {
   res.redirect('confirmation')
 })
 
+router.post('/app/user/:id/close/check-and-submit', function (req, res) {
+  req.session.data.existingAuthorisedRepresentatives.find(function (rep, index) {
+    if (rep.id === req.params.id) {
+        req.session.data.existingAuthorisedRepresentatives[index].status = 'Closure requested - pending approval'
+        var taskID = generateID(116032, 126062)
+        var newTask = {
+          'taskID': taskID,
+          'accountID': rep.id,
+          'accountName': rep.name,
+          'started': new Date(Date.now()).toISOString(),
+          'lastUpdated': new Date(Date.now()).toISOString(),
+          'type': 'Account closure',
+          'notes': req.session.data.user.close.moreDetail,
+          'proposerId': req.session.data.existingAuthorisedRepresentatives[6].id,
+          'proposer': req.session.data.existingAuthorisedRepresentatives[6].name,
+          'taskStatus': 'Awaiting approval',
+          'accountType': 'user'
+        }
+        // push newly generated transaction onto transactions table
+        req.session.data.tasks.push(newTask)
+    }}
+  )
+  res.redirect('confirmation')
+})
+
 router.post('/account/:id/surrender-allowance/surrender-amount', function (req, res) {
     if (req.session.data.etsSurrenderAllowance.draft.surrenderMethod === 'fullAmount') {
         req.session.data.etsSurrenderAllowance.draft.amountToSurrender = parseInt(req.session.data.etsSurrenderAllowance.surrenderAmountDue) - parseInt(req.session.data.etsSurrenderAllowance.totalAmountSurrendered)
@@ -392,22 +420,25 @@ router.post('/account/:id/reinstate/check-and-submit', function (req, res) {
 router.post('/account/:id/close/check-and-submit', function (req, res) {
   req.session.data.installations.find(function (installation,index) {
     if (installation.permitId === req.params.id) {
-        req.session.data.installations[index].status = 'closed';
+        req.session.data.installations[index].status = 'Closure requested - pending approval'
+        var taskID = generateID(116032, 126062)
+        var newTask = {
+          'taskID': taskID,
+          'accountID': installation.permitId,
+          'accountName': installation.name,
+          'started': new Date(Date.now()).toISOString(),
+          'lastUpdated': new Date(Date.now()).toISOString(),
+          'type': 'Account closure',
+          'notes': req.session.data.account.close.moreDetail,
+          'proposerId': req.session.data.existingAuthorisedRepresentatives[6].id,
+          'proposer': req.session.data.existingAuthorisedRepresentatives[6].name,
+          'taskStatus': 'Awaiting approval',
+          'accountType': 'account'
+        }
+        // push newly generated transaction onto transactions table
+        req.session.data.tasks.push(newTask)
     }}
   )
-  var taskID = generateID(116032, 126062)
-  var newTask = {
-    'taskID': taskID,
-    'started': new Date(Date.now()).toISOString(),
-    'lastUpdated': new Date(Date.now()).toISOString(),
-    'type': 'Block account',
-    'notes': req.session.data.account.block.moreDetail,
-    'proposerId': req.session.data.existingAuthorisedRepresentatives[6].id,
-    'proposer': req.session.data.existingAuthorisedRepresentatives[6].name,
-    'status': 'Awaiting approval'
-  }
-  // push newly generated transaction onto transactions table
-  req.session.data.tasks.push(newTask)
   res.redirect('confirmation')
 })
 
